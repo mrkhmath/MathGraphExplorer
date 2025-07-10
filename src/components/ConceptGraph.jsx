@@ -157,12 +157,15 @@ export default function ConceptGraph({ concepts }) {
   const handleCanvasClick = () => setSelectedNode(null);
 
   // Related edges and types
+  const memoizedEdges = useMemo(() => edges, [edges]);
+const memoizedNodes = useMemo(() => nodes, [nodes]);
+
   const relatedEdges = useMemo(
     () =>
       selectedNode
-        ? edges.filter((e) => e.data.type && e.source === selectedNode.id)
+        ? memoizedEdges.filter((e) => e.data.type && e.source === selectedNode.id)
         : [],
-    [edges, selectedNode]
+    [memoizedEdges, selectedNode]
   );
   const edgeTypes = useMemo(
     () => [...new Set(relatedEdges.map((e) => e.data.type))],
@@ -176,14 +179,14 @@ export default function ConceptGraph({ concepts }) {
             .map((e) => {
               const otherId =
                 e.source === selectedNode.id ? e.target : e.source;
-              const node = nodes.find((n) => n.id === otherId);
+              const node = memoizedNodes.find((n) => n.id === otherId);
               return node
                 ? { ...node.data, confidence: e.data.confidence }
                 : null;
             })
             .filter(Boolean)
         : [],
-    [relatedEdges, selectedEdgeType, selectedNode, nodes]
+    [relatedEdges, selectedEdgeType, selectedNode, memoizedNodes]
   );
 
   return (
@@ -198,8 +201,8 @@ export default function ConceptGraph({ concepts }) {
           </div>
         ) : (
           <GraphArea
-            nodes={nodes}
-            edges={edges}
+            nodes={memoizedNodes}
+            edges={memoizedEdges}
             onNodeClick={handleNodeClick}
             onCanvasClick={handleCanvasClick}
           />
