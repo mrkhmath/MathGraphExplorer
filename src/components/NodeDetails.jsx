@@ -1,7 +1,6 @@
 import React from 'react';
 
 export default function NodeDetails({ selectedNode }) {
-  console.log('NodeDetails render, selectedNode =', selectedNode);
 
   if (!selectedNode) {
     return (

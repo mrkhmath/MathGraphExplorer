@@ -90,6 +90,7 @@ export default function ConceptGraph({ concepts }) {
 
     displayConcepts.forEach((src) => {
       (src.inferredAlignmentsConnection?.edges || []).forEach((e) => {
+        console.log(e.properties.alignmentType)
         const tgt = e.node;
         const alignmentType = e.properties?.alignmentType || "INFERRED_ALIGNMENT";
         if (validIds.has(src.id) && validIds.has(tgt?.id)) {
