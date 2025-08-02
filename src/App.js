@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Explore from './pages/Explore';
-import MLPlayground from './pages/MLPlayground';
+import MLSandbox from './pages/MLSandbox';
 import Dashboard from './pages/Dashboard';
 
 const client = new ApolloClient({
@@ -19,7 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/explore" />} />
             <Route path="/explore" element={<Explore />} />
-            <Route path="/ml" element={<MLPlayground />} />
+            <Route path="/ml" element={<MLSandbox />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </div>
