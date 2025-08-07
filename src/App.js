@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navbar from './components/Navbar';
 import Explore from './pages/Explore';
 import MLSandbox from './pages/MLSandbox';
-import Dashboard from './pages/Dashboard';
+
 
 const client = new ApolloClient({
   uri: 'https://ccss-graph-server.onrender.com/graphql', // <-- no trailing slash
@@ -20,7 +20,7 @@ function App() {
             <Route path="/" element={<Navigate to="/explore" />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/ml" element={<MLSandbox />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+    
           </Routes>
         </div>
       </Router>

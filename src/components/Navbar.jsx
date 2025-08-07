@@ -12,7 +12,7 @@ const Navbar = () => {
     <nav className="flex items-center gap-6 px-4 py-3 bg-white shadow sticky top-0 z-10">
       <Link to="/explore" className={linkStyle('/explore')}>Explore</Link>
       <Link to="/ml" className={linkStyle('/ml')}>ML Sandbox</Link>
-      <Link to="/dashboard" className={linkStyle('/dashboard')}>Dashboard</Link>
+    
     </nav>
   );
 };
