@@ -6,7 +6,7 @@ import MLSandbox from './pages/MLSandbox';
 
 
 const client = new ApolloClient({
-  uri: 'https://ccss-graph-server.onrender.com/graphql', // <-- no trailing slash
+  uri: 'https://ccss-graph-server.onrender.com/graphql', //
   cache: new InMemoryCache(),
 });
 
