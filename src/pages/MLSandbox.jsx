@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import VisGraph from "./VisGraph";
 
 const API_URL = "https://ml-sandbox-backend.onrender.com/predict_readiness";
+// const API_URL = "https://ml-sandbox-backend.onrender.com/";
 
 const studentOptions = ["000f6446a2f18b146741956807f5ec64c2a7ff539f4c7d733e37c6aa16799f16",
   "6e3f3790948a67fd8224c3da772ec02ca5c3e9d1387b147dd769f4cd40053a60",
@@ -178,61 +179,96 @@ export default function MLSandbox() {
   const [error, setError] = useState(null);
   const [graphError, setGraphError] = useState(false);
 
-  const handlePredict = async () => {
-    if (!studentId || !targetCcss || !dok) {
-      setError("Please fill in all fields.");
+const handlePredict = async () => {
+  // Validate (dok can be 1–4; don't treat 1 as "missing")
+  if (!studentId || !targetCcss || Number.isNaN(Number(dok))) {
+    setError("Please fill in all fields.");
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+  setResult(null);
+  setGraphData(null);
+  setGraphError(false);
+
+  // Optional: cancel in-flight if user clicks twice
+  const ac = new AbortController();
+  const { signal } = ac;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        student_id: studentId,
+        target_ccss: targetCcss,
+        normalized_dok: Number(dok),
+      }),
+      signal,
+    });
+
+    // Read raw text first so we can parse or show HTML errors
+    const raw = await res.text();
+    let data;
+    try { data = raw ? JSON.parse(raw) : {}; } catch { data = { error: raw }; }
+
+    if (!res.ok) {
+      // Show backend message if present
+      const msg = (data && data.error) ? data.error : `Server error ${res.status}`;
+      throw new Error(msg);
+    }
+
+    // Expect: { readiness, probability, graph }
+    setResult({ readiness: data.readiness, probability: data.probability });
+
+    // Normalize graph shape
+    const rawNodes = Array.isArray(data.graph?.nodes) ? data.graph.nodes : [];
+    const rawEdges = Array.isArray(data.graph?.links)
+      ? data.graph.links
+      : Array.isArray(data.graph?.edges)
+        ? data.graph.edges
+        : [];
+
+    if (rawNodes.length === 0) {
+      console.warn("⚠️ Invalid or empty graph data:", data.graph);
+      setGraphError(true);
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setGraphData(null);
-    setGraphError(false);
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ student_id: studentId, target_ccss: targetCcss, normalized_dok: dok })
-      });
-
-      const data = await response.json();
-      console.log("📦 API Response:", data);
-
-      if (!response.ok) throw new Error(data.error || "Prediction failed");
-
-      setResult({ readiness: data.readiness, probability: data.probability });
-
-      if (!data.graph || !Array.isArray(data.graph.nodes) || !Array.isArray(data.graph.links) || data.graph.nodes.length === 0) {
-        console.warn("⚠️ Invalid or empty graph data:", data.graph);
-        setGraphError(true);
-        return;
-      }
-
-      const nodes = data.graph.nodes.map((n) => ({
-        id: n.label,
-        color: n.label === targetCcss ? "red" : "#1f77b4",
-        label: n.label,
+    // Build nodes with id/label fallbacks
+    const nodes = rawNodes.map((n) => {
+      const id = n.id ?? n.label;           // prefer n.id
+      const label = n.label ?? n.id ?? id;  // display label
+      return {
+        id,
+        color: label === targetCcss ? "red" : "#1f77b4",
+        label,
         description: n.description ?? "No description",
         grade_levels: n.grade_levels ?? [],
         score: n.score,
-      }));
+      };
+    });
 
-      const links = data.graph.links.map((l) => ({
-        source: l.source,
-        target: l.target,
-        label: l.type,
-      }));
+    // Build links with source/target fallbacks
+    const links = rawEdges.map((e) => ({
+      source: e.source ?? e.from ?? e.src ?? e.start,
+      target: e.target ?? e.to   ?? e.dst ?? e.end,
+      label:  e.type   ?? e.label ?? "",
+    }));
 
-      setGraphData({ nodes, links });
-    } catch (err) {
-      console.error("❌ Request failed:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setGraphData({ nodes, links });
+  } catch (err) {
+    console.error("❌ Request failed:", err);
+    // Friendlier network message
+    const msg = (err?.message?.includes("Failed to fetch"))
+      ? "Backend unreachable (network/timeout). Try again or check server logs."
+      : err.message || "Unexpected error";
+    setError(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6 bg-white rounded shadow">
