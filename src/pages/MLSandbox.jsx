@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import VisGraph from "./VisGraph";
 
-const API_URL = "https://ml-sandbox-backend.onrender.com";
+const API_URL = "https://ml-sandbox-backend.onrender.com/predict_readiness";
 
 const studentOptions = ["000f6446a2f18b146741956807f5ec64c2a7ff539f4c7d733e37c6aa16799f16",
   "6e3f3790948a67fd8224c3da772ec02ca5c3e9d1387b147dd769f4cd40053a60",
