@@ -308,15 +308,23 @@ const handlePredict = async () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Depth of Knowledge</label>
-          <select
-            className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            value={dok}
-            onChange={(e) => setDok(Number(e.target.value))}
-          >
-            {[1, 2, 3, 4].map((level) => (
-              <option key={level} value={level}>DoK {level}</option>
-            ))}
-          </select>
+       <select
+  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+  value={dok}
+  onChange={(e) => setDok(Number(e.target.value))}
+>
+  {[
+    { level: 1, label: "DoK 1 – Recall Facts" },
+    { level: 2, label: "DoK 2 – Apply Skills" },
+    { level: 3, label: "DoK 3 – Strategic Thinking" },
+    { level: 4, label: "DoK 4 – Extended Reasoning" }
+  ].map(({ level, label }) => (
+    <option key={level} value={level}>
+      {label}
+    </option>
+  ))}
+</select>
+
         </div>
       </div>
 
